@@ -14,6 +14,7 @@
 #import "VolumeBar.h"
 #import "GMPVolumeView.h"
 #import "UIBackdropView.h"
+#import "VolumeControl.h"
 #include <tgmath.h>
 
 @implementation VolumeBar
@@ -74,7 +75,23 @@
 }
 */
 
--(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle {
+-(void)ringerSliderAction:(id)sender {
+  UISlider *slider = (UISlider*)sender;
+  NSLog(@"Slider value is: %f", slider.value);
+  volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
+  float delta = slider.value - [volumeControl volume];
+  [volumeControl _changeVolumeBy:delta];
+}
+
+-(void)ringerChanged:(NSNotification *)notification {
+  NSDictionary*dict=notification.userInfo;
+  float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
+  [ringerSlider setValue:value animated:YES];
+  NSLog(@"Ringer changed with buttons, currently: %f", value);
+}
+
+-(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view {
+  NSLog(@"createHUDWithColor");
   // get size of screen, then calculate banner size
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
@@ -109,13 +126,32 @@
     [mainView addSubview:blurView];
   }
 
-  // make the MPVolumeView with the frame, make it clear, using GMPVolumeView to fix positioning
-  volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
-  volumeSlider.backgroundColor = [UIColor clearColor];
-  [volumeSlider setUserInteractionEnabled:userInteraction];
-  volumeSlider.showsRouteButton = showRouteButton;
+  if([view mode] == 1) {
+    NSLog(@"view mode = 1, showing ringer slider");
+    // if ringer, create UISlider and have it call volume change method
+    ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
+    ringerSlider.continuous = YES;
+    ringerSlider.minimumValue = 0.0625;
+    ringerSlider.maximumValue = 1.0;
+    [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
+    [ringerSlider setBackgroundColor:[UIColor clearColor]];
+    [ringerSlider setUserInteractionEnabled:userInteraction];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(ringerChanged:)
+                                                 name:@"AVSystemController_SystemVolumeDidChangeNotification"
+                                               object:nil];
+    [mainView addSubview:ringerSlider];
+  }
+  else {
+    NSLog(@"view mode = 0, showing GMPVolumeView");
+    // if volume, make the MPVolumeView with the frame, make it clear, using GMPVolumeView to fix positioning
+    volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
+    [volumeSlider setBackgroundColor:[UIColor clearColor]];
+    [volumeSlider setUserInteractionEnabled:userInteraction];
+    volumeSlider.showsRouteButton = showRouteButton;
+    [mainView addSubview:volumeSlider];
+  }
 
-  [mainView addSubview:volumeSlider];
 
   mainView.frame = CGRectMake(0, (-1 * bannerHeight) - 10, screenWidth, bannerHeight); // hide mainView so animation can pull in
 
@@ -123,6 +159,7 @@
 }
 
 -(void)showHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed {
+  NSLog(@"showHUDWithAnimation");
   topWindow.hidden = NO;
   if(animate) {
     [UIView animateWithDuration:speed
@@ -141,6 +178,7 @@
 }
 
 -(void)hideHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed {
+  NSLog(@"hideHUDWithAnimation");
   if(animate) {
     [UIView animateWithDuration:speed
 	    delay:0
@@ -161,21 +199,28 @@
     topWindow.hidden = YES;
     alive = NO;
   }
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:@"AVSystemController_SystemVolumeDidChangeNotification"
+                                                object:nil];
 }
 
 -(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view {
   // [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
   if(!alive) {
-    [self createHUDWithColor:color WithInteraction:userInteraction WithRouteButton:showRouteButton WithBlur:blur WithBlurStyle:blurStyle];
+    NSLog(@"loadHUDWithColor, currently dead");
+    [self createHUDWithColor:color WithInteraction:userInteraction WithRouteButton:showRouteButton WithBlur:blur WithBlurStyle:blurStyle WithView:view];
     [self showHUDWithAnimation:animate WithSpeed:speed];
-  }
 
-  // after time, hide the banner
-  dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayTime * NSEC_PER_SEC);
-  dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-    [self hideHUDWithAnimation:animate WithSpeed:speed];
-  });
+    // after time, hide the banner
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayTime * NSEC_PER_SEC);
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+      [self hideHUDWithAnimation:animate WithSpeed:speed];
+    });
+  }
+  else {
+    NSLog(@"loadHUDWithColor, currently alive");
+  }
 }
 
 @end

@@ -13,6 +13,7 @@
 #import <MediaPlayer/MediaPlayer.h>
 #import "GMPVolumeView.h"
 #import "UIBackdropView.h"
+#import "VolumeControl.h"
 #include <tgmath.h>
 
 @interface VolumeBar : NSObject {
@@ -22,18 +23,23 @@
 	_UIBackdropViewSettings *blurSettings;
 
 	GMPVolumeView *volumeSlider;
+	UISlider *ringerSlider;
   CGFloat screenWidth;
   CGFloat screenHeight;
   CGFloat bannerHeight;
   CGFloat sliderPadding;
 
 	BOOL alive;
+
+	VolumeControl *volumeControl;
 }
 
 +(VolumeBar*)sharedInstance;
 // -(void)orientationChanged:(NSNotification *)notification;
 // -(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation;
--(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle;
+-(void)ringerSliderAction:(id)sender;
+-(void)ringerChanged:(NSNotification *)notification;
+-(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view;
 -(void)showHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
 -(void)hideHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
 -(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view;
