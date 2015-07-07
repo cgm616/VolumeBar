@@ -32,6 +32,48 @@ static BOOL settingsChanged;
 @implementation VolumeBarListController {
 }
 
+-(void)respring {
+  system("killall -9 backboardd");
+}
+
+-(void)setPreferenceValue:(id)value specifier:(PSSpecifier *)spec {
+	[super setPreferenceValue:value specifier:spec];
+	if (!settingsChanged) {
+		settingsChanged = YES;
+    [self settingsChanged];
+	}
+}
+
+-(id)specifiers {
+	if(_specifiers == nil) {
+		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBar" target:self] retain];
+	}
+	return _specifiers;
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+  [self clearCache];
+  [self reload];
+  [super viewWillAppear:animated];
+	if(settingsChanged) {
+		[self settingsChanged];
+	}
+}
+
+-(void)settingsChanged {
+  UIBarButtonItem *respringButton([[UIBarButtonItem alloc] initWithTitle:@"Respring" style:UIBarButtonItemStyleDone target:self action:@selector(respring)]);
+  [[self navigationItem] setLeftBarButtonItem:respringButton];
+  [respringButton release];
+}
+
+@end
+
+@interface VBSettingsListController: PSListController {
+}
+@end
+
+@implementation VBSettingsListController
+
 -(void)githubButton {
   NSString *user = @"cgm616/VolumeBar";
 	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"https://github.com/" stringByAppendingString:user]]];
@@ -95,48 +137,6 @@ static BOOL settingsChanged;
   else
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:user]]];
 }
-
--(void)respring {
-  system("killall -9 backboardd");
-}
-
--(void)setPreferenceValue:(id)value specifier:(PSSpecifier *)spec {
-	[super setPreferenceValue:value specifier:spec];
-	if (!settingsChanged) {
-		settingsChanged = YES;
-    [self settingsChanged];
-	}
-}
-
--(id)specifiers {
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBar" target:self] retain];
-	}
-	return _specifiers;
-}
-
--(void)viewWillAppear:(BOOL)animated {
-  [self clearCache];
-  [self reload];
-  [super viewWillAppear:animated];
-	if(settingsChanged) {
-		[self settingsChanged];
-	}
-}
-
--(void)settingsChanged {
-  UIBarButtonItem *respringButton([[UIBarButtonItem alloc] initWithTitle:@"Respring" style:UIBarButtonItemStyleDone target:self action:@selector(respring)]);
-  [[self navigationItem] setLeftBarButtonItem:respringButton];
-  [respringButton release];
-}
-
-@end
-
-@interface VBSettingsListController: PSListController {
-}
-@end
-
-@implementation VBSettingsListController
 
 -(void)setPreferenceValue:(id)value specifier:(PSSpecifier *)spec {
 	[super setPreferenceValue:value specifier:spec];
