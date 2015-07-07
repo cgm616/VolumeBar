@@ -1,0 +1,13 @@
+Packages/
+
+obj/
+
+theos
+
+.theos/
+
+_/
+
+.DS_Store
+
+deployment-config.json

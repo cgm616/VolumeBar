@@ -1,0 +1,10 @@
+Package: me.cgm616.volumebar
+Name: VolumeBar
+Version: 0.0.1~beta
+Architecture: iphoneos-arm
+Depends: mobilesubstrate, org.thebigboss.libcolorpicker
+Description: Changes the ugly volume HUD to a nice bar.
+Maintainer: cgm616 <cgm616+cydia@gmail.com>
+Author: cgm616 <cgm616+cydia@gmail.com>
+Depiction: http://repo.graber-mitchell.com/depictions/?dep=me.cgm616.volumebar
+Section: Tweaks

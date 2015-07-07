@@ -1,0 +1,10 @@
+{
+  entry = {
+	  bundle = VolumeBar;
+	  cell = PSLinkCell;
+	  detail = VolumeBarListController;
+	  icon = VolumeBar.png;
+	  isController = 1;
+	  label = VolumeBar;
+  };
+}
