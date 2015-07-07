@@ -90,7 +90,7 @@
   NSLog(@"Ringer changed with buttons, currently: %f", value);
 }
 
--(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view {
+-(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop{
   NSLog(@"createHUDWithColor");
   // get size of screen, then calculate banner size
   CGRect screenRect = [[UIScreen mainScreen] bounds];
@@ -112,6 +112,15 @@
   [mainView setBackgroundColor:color];
   [mainView setUserInteractionEnabled:YES];
   [topWindow addSubview:mainView];
+
+  if(drop) {
+    UIBezierPath *shadowPath = [UIBezierPath bezierPathWithRect:mainView.bounds];
+    mainView.layer.masksToBounds = NO;
+    mainView.layer.shadowColor = [UIColor blackColor].CGColor;
+    mainView.layer.shadowOffset = CGSizeMake(0.0f, 5.0f);
+    mainView.layer.shadowOpacity = 0.5f;
+    mainView.layer.shadowPath = shadowPath.CGPath;
+  }
 
   if(blur) {
     [mainView setBackgroundColor:[UIColor clearColor]]; // if blurred, change color to clear
@@ -204,12 +213,12 @@
                                                 object:nil];
 }
 
--(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view {
+-(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop {
   // [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
 
   if(!alive) {
     NSLog(@"loadHUDWithColor, currently dead");
-    [self createHUDWithColor:color WithInteraction:userInteraction WithRouteButton:showRouteButton WithBlur:blur WithBlurStyle:blurStyle WithView:view];
+    [self createHUDWithColor:color WithInteraction:userInteraction WithRouteButton:showRouteButton WithBlur:blur WithBlurStyle:blurStyle WithView:view WithDrop:drop];
     [self showHUDWithAnimation:animate WithSpeed:speed];
 
     // after time, hide the banner

@@ -39,9 +39,9 @@
 // -(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation;
 -(void)ringerSliderAction:(id)sender;
 -(void)ringerChanged:(NSNotification *)notification;
--(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view;
+-(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop;
 -(void)showHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
 -(void)hideHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
--(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view;
+-(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop;
 
 @end

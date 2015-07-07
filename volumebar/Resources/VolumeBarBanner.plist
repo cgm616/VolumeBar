@@ -34,6 +34,24 @@
 			<key>defaults</key>
 			<string>me.cgm616.volumebar</string>
 			<key>key</key>
+			<string>drop</string>
+			<key>label</key>
+			<string>Use Drop Shadow</string>
+			<key>default</key>
+			<false/>
+			<key>PostNotification</key>
+			<string>me.cgm616.volumebar/preferences.changed</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>defaults</key>
+			<string>me.cgm616.volumebar</string>
+			<key>key</key>
 			<string>blur</string>
 			<key>label</key>
 			<string>Use Blur instead Color</string>
