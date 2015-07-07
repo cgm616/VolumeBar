@@ -74,10 +74,8 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 %hook SBHUDController
 
 -(void)presentHUDView:(id)view autoDismissWithDelay:(double)delay {
-  %log;
   if([view isKindOfClass:objc_getClass("SBVolumeHUDView")] && enabled) {
     [[VolumeBar sharedInstance] loadHUDWithColor:bannerColor WithInteraction:interaction WithRouteButton:routeButton WithAnimation:animateOn WithSpeed:animateTime WithTime:timeOnScreen WithBlur:blur WithBlurStyle:blurStyle WithView:view];
-    NSLog(@"view mode: %ld", (long)[view mode]);
   }
   else {
     %orig;
@@ -85,10 +83,8 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 }
 
 -(void)presentHUDView:(id)view {
-  %log;
   if([view isKindOfClass:objc_getClass("SBVolumeHUDView")] && enabled) {
     [[VolumeBar sharedInstance] loadHUDWithColor:bannerColor WithInteraction:interaction WithRouteButton:routeButton WithAnimation:animateOn WithSpeed:animateTime WithTime:timeOnScreen WithBlur:blur WithBlurStyle:blurStyle WithView:view];
-    NSLog(@"view mode: %ld", (long)[view mode]);
   }
   else {
     %orig;
