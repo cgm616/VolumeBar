@@ -21,6 +21,8 @@
 	UIView *mainView;
 	_UIBackdropView *blurView;
 	_UIBackdropViewSettings *blurSettings;
+	UISwipeGestureRecognizer *swipeRecognizer;
+	UIView *handle;
 
 	GMPVolumeView *volumeSlider;
 	UISlider *ringerSlider;
@@ -29,19 +31,32 @@
   CGFloat bannerHeight;
   CGFloat sliderPadding;
 
-	BOOL alive;
+	BOOL _alive;
+	id _view;
 
 	VolumeControl *volumeControl;
 }
 
+@property (nonatomic) BOOL animate;
+@property (nonatomic) BOOL userInteraction;
+@property (nonatomic) BOOL showRouteButton;
+@property (nonatomic) BOOL blur;
+@property (nonatomic) BOOL drop;
+@property (nonatomic) BOOL slide;
+@property (nonatomic) double delayTime;
+@property (nonatomic) double speed;
+@property (nonatomic) int blurStyle;
+@property (nonatomic, strong) UIColor *color;
+
 +(VolumeBar*)sharedInstance;
 // -(void)orientationChanged:(NSNotification *)notification;
 // -(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation;
+-(void)swipeHandler:(UISwipeGestureRecognizer *)recognizer;
 -(void)ringerSliderAction:(id)sender;
 -(void)ringerChanged:(NSNotification *)notification;
--(void)createHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop;
--(void)showHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
--(void)hideHUDWithAnimation:(BOOL)animate WithSpeed:(double)speed;
--(void)loadHUDWithColor:(UIColor*)color WithInteraction:(BOOL)userInteraction WithRouteButton:(BOOL)showRouteButton WithAnimation:(BOOL)animate WithSpeed:(double)speed WithTime:(double)delayTime WithBlur:(BOOL)blur WithBlurStyle:(int)blurStyle WithView:(id)view WithDrop:(BOOL)drop;
+-(void)createHUD;
+-(void)showHUD;
+-(void)hideHUD;
+-(void)loadHUDWithView:(id)view;
 
 @end

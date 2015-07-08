@@ -20,15 +20,16 @@ extern "C" UIColor *colorFromDefaultsWithKey(NSString *defaults, NSString *key, 
 
 static NSDictionary *preferences;
 BOOL enabled;
-BOOL animateOn;
-BOOL interaction;
-BOOL routeButton;
+BOOL animate;
+BOOL userInteraction;
+BOOL showRouteButton;
 BOOL blur;
 BOOL drop;
-double timeOnScreen;
-double animateTime;
+BOOL slide;
+double delayTime;
+double speed;
 int blurStyle;
-UIColor *bannerColor;
+UIColor *color;
 
 static void initPrefs() {
 	[preferences release];
@@ -50,23 +51,35 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
   initPrefs();
   NSNumber *key = preferences[@"enabled"];
   enabled = key ? [key boolValue] : 1;
+
   key = preferences[@"animation"];
-  animateOn = key ? [key boolValue] : 1;
+  animate = key ? [key boolValue] : 1;
+
   key = preferences[@"interaction"];
-  interaction = key ? [key boolValue] : 1;
+  userInteraction = key ? [key boolValue] : 1;
+
   key = preferences[@"routebutton"];
-  routeButton = key ? [key boolValue] : 0;
+  showRouteButton = key ? [key boolValue] : 0;
+
   key = preferences[@"blur"];
   blur = key ? [key boolValue] : 1;
+
 	key = preferences[@"drop"];
   drop = key ? [key boolValue] : 0;
+
+	key = preferences[@"slide"];
+	slide = key ? [key boolValue] : 1;
+
   key = preferences[@"timeon"];
-  timeOnScreen = key ? [key doubleValue] : 5.0;
+  delayTime = key ? [key doubleValue] : 5.0;
+
   key = preferences[@"animatetime"];
-  animateTime = key ? [key doubleValue] : 0.2;
+  speed = key ? [key doubleValue] : 0.2;
+
   key = preferences[@"blurstyle"];
   blurStyle = key ? [key intValue] : 2;
-  bannerColor = colorFromDefaultsWithKey(@"me.cgm616.volumebar", @"bannercolor", @"#ffffff");
+	
+  color = colorFromDefaultsWithKey(@"me.cgm616.volumebar", @"bannercolor", @"#ffffff");
 }
 
 %ctor {
@@ -78,7 +91,18 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 -(void)presentHUDView:(id)view autoDismissWithDelay:(double)delay {
   if([view isKindOfClass:objc_getClass("SBVolumeHUDView")] && enabled) {
-    [[VolumeBar sharedInstance] loadHUDWithColor:bannerColor WithInteraction:interaction WithRouteButton:routeButton WithAnimation:animateOn WithSpeed:animateTime WithTime:timeOnScreen WithBlur:blur WithBlurStyle:blurStyle WithView:view WithDrop:drop];
+    VolumeBar *vbar = [VolumeBar sharedInstance];
+		vbar.color = color;
+		vbar.animate = animate;
+		vbar.userInteraction = userInteraction;
+		vbar.showRouteButton = showRouteButton;
+		vbar.blur = blur;
+		vbar.drop = drop;
+		vbar.slide = slide;
+		vbar.delayTime = delayTime;
+		vbar.speed = speed;
+		vbar.blurStyle = blurStyle;
+		[vbar loadHUDWithView:view];
   }
   else {
     %orig;
@@ -87,7 +111,18 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 -(void)presentHUDView:(id)view {
   if([view isKindOfClass:objc_getClass("SBVolumeHUDView")] && enabled) {
-    [[VolumeBar sharedInstance] loadHUDWithColor:bannerColor WithInteraction:interaction WithRouteButton:routeButton WithAnimation:animateOn WithSpeed:animateTime WithTime:timeOnScreen WithBlur:blur WithBlurStyle:blurStyle WithView:view WithDrop:drop];
+		VolumeBar *vbar = [VolumeBar sharedInstance];
+		vbar.color = color;
+		vbar.animate = animate;
+		vbar.userInteraction = userInteraction;
+		vbar.showRouteButton = showRouteButton;
+		vbar.blur = blur;
+		vbar.drop = drop;
+		vbar.slide = slide;
+		vbar.delayTime = delayTime;
+		vbar.speed = speed;
+		vbar.blurStyle = blurStyle;
+		[vbar loadHUDWithView:view];
   }
   else {
     %orig;
