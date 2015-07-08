@@ -156,6 +156,7 @@
     // if ringer, create UISlider and have it call volume change method
     ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
     ringerSlider.continuous = YES;
+    ringerSlider.value = [[NSClassFromString(@"VolumeControl") sharedVolumeControl] volume];
     ringerSlider.minimumValue = 0.0625;
     ringerSlider.maximumValue = 1.0;
     [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
