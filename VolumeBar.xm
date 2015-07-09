@@ -25,9 +25,12 @@
 @synthesize showRouteButton = _showRouteButton;
 @synthesize blur = _blur;
 @synthesize drop = _drop;
+@synthesize statusBar = _statusBar;
 @synthesize slide = _slide;
+@synthesize label = _label;
 @synthesize delayTime = _delayTime;
 @synthesize speed = _speed;
+@synthesize height = _height;
 @synthesize blurStyle = _blurStyle;
 
 +(VolumeBar*)sharedInstance {
@@ -106,17 +109,50 @@
   NSLog(@"Ringer changed with buttons, currently: %f", value);
 }
 
--(void)createHUD {
-  NSLog(@"createHUD");
-  // get size of screen, then calculate banner size
+-(void)calculateRender {
+  NSLog(@"calculateRender");
+
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
-  bannerHeight = _slide ? screenHeight / 9 : screenHeight / 12;
-  sliderPadding = screenWidth / 16;
+
+  bannerX = 0;
+  bannerWidth = screenWidth;
+	bannerY = 0;
+  bannerHeight = 40 * _height;
+
+  sliderX = screenWidth / 16;
+  sliderWidth = screenWidth - (2 * sliderX);
+  sliderY = 0;
+
+  if(_statusBar) {
+    CGSize statusBarSize = [[UIApplication sharedApplication] statusBarFrame].size;
+    float statusBarHeight = MIN(statusBarSize.width, statusBarSize.height);
+    bannerHeight = statusBarHeight > 20 ? statusBarHeight : 20;
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(2, 2), NO, 0.0);
+    thumbImage = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+  }
+
+  sliderHeight = bannerHeight;
+
+  if(_slide && !_statusBar) {
+    bannerHeight = bannerHeight + 12;
+  }
+
+  if(_label && !_statusBar) {
+    sliderY = 14;
+    bannerHeight = bannerHeight + sliderY;
+  }
+}
+
+-(void)createHUD {
+  NSLog(@"createHUD");
+
+  [self calculateRender];
 
   // create window to show when HUD fires
-  topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, screenWidth, bannerHeight)];
+  topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)];
   topWindow.windowLevel = UIWindowLevelStatusBar;
   topWindow.backgroundColor = [UIColor clearColor];
   [topWindow setUserInteractionEnabled:YES];
@@ -124,7 +160,7 @@
   topWindow.hidden = YES;
 
   // create the superview for everything else
-  mainView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, bannerHeight)];
+  mainView = [[UIView alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)];
   [mainView setBackgroundColor:_color];
   [mainView setUserInteractionEnabled:YES];
   [topWindow addSubview:mainView];
@@ -153,44 +189,54 @@
 
   if([_view mode] == 1) {
     NSLog(@"view mode = 1, showing ringer slider");
-    // if ringer, create UISlider and have it call volume change method
-    ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
+    ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
     ringerSlider.continuous = YES;
     ringerSlider.value = [[NSClassFromString(@"VolumeControl") sharedVolumeControl] volume];
-    ringerSlider.minimumValue = 0.0625;
+    ringerSlider.minimumValue = 0;
     ringerSlider.maximumValue = 1.0;
     [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
     [ringerSlider setBackgroundColor:[UIColor clearColor]];
     [ringerSlider setUserInteractionEnabled:_userInteraction];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(ringerChanged:)
-                                                 name:@"AVSystemController_SystemVolumeDidChangeNotification"
-                                               object:nil];
+    if(_statusBar) {
+      [ringerSlider setThumbImage:thumbImage forState:UIControlStateNormal];
+    }
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ringerChanged:) name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
     [mainView addSubview:ringerSlider];
   }
   else {
     NSLog(@"view mode = 0, showing GMPVolumeView");
-    // if volume, make the MPVolumeView with the frame, make it clear, using GMPVolumeView to fix positioning
-    volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight)];
+    volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
     [volumeSlider setBackgroundColor:[UIColor clearColor]];
     [volumeSlider setUserInteractionEnabled:_userInteraction];
-    volumeSlider.showsRouteButton = _showRouteButton;
+    volumeSlider.showsRouteButton = (_showRouteButton || !_statusBar);
+    if(_statusBar) {
+      [volumeSlider setVolumeThumbImage:thumbImage forState:UIControlStateNormal];
+    }
     [mainView addSubview:volumeSlider];
   }
 
-  mainView.frame = CGRectMake(0, (-1 * bannerHeight) - 10, screenWidth, bannerHeight); // hide mainView so animation can pull in
-
-  if(_slide) {
-    [_view mode] == 1 ? [ringerSlider setFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), screenHeight / 12)] : [volumeSlider setFrame:CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), screenHeight / 12)];
-    handle = [[UIView alloc] initWithFrame:CGRectMake((screenWidth / 2) - (screenWidth / 16), screenHeight / 11.5, screenWidth / 8, (screenHeight / 9.5) - (screenHeight / 11.5))];
-    [handle setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]]; // medium alpha black
-    handle.layer.cornerRadius = screenWidth / 52;
+  if(_slide && !_statusBar) {
+    handle = [[UIView alloc] initWithFrame:CGRectMake((screenWidth / 2) - 16, bannerHeight - 10, 32, 8)];
+    [handle setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]];
+    handle.layer.cornerRadius = 4;
     handle.layer.masksToBounds = YES;
     [mainView addSubview:handle];
-
     swipeRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(swipeHandler:)];
     [swipeRecognizer setDirection:UISwipeGestureRecognizerDirectionUp];
   }
+
+  if(_label && !_statusBar) {
+    label = [[UILabel alloc] initWithFrame:CGRectMake(bannerX, bannerY + 2, bannerWidth, sliderY)];
+    [label setBackgroundColor:[UIColor clearColor]];
+    label.text = [_view mode] == 1 ? @"Ringer" : @"Player";
+    label.textColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+
+    label.textAlignment = NSTextAlignmentCenter;
+    label.font = [UIFont systemFontOfSize:12];
+    [mainView addSubview:label];
+  }
+
+  mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
 
   _alive = YES;
 }
@@ -203,17 +249,17 @@
 	    delay:0
 	    options:(UIViewAnimationOptionCurveLinear | UIViewAnimationOptionAllowUserInteraction)
 	    animations:^ {
-	      mainView.frame = CGRectMake(0, 0, screenWidth, bannerHeight);
+	      mainView.frame = CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight);
 	    }
 	    completion:^(BOOL finished) {
 	    }
     ];
   }
   else {
-    mainView.frame = CGRectMake(0, 0, screenWidth, bannerHeight);
+    mainView.frame = CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight);
   }
 
-  if(_slide) {
+  if(_slide && !_statusBar) {
     [handle addGestureRecognizer:swipeRecognizer];
     [mainView addGestureRecognizer:swipeRecognizer];
   }
@@ -226,7 +272,7 @@
 	    delay:0
 	    options:(UIViewAnimationOptionCurveLinear | UIViewAnimationOptionAllowUserInteraction)
 	    animations:^ {
-	      mainView.frame = CGRectMake(0, (-1 * bannerHeight) - 10, screenWidth, bannerHeight);
+	      mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
 	    }
 	    completion:^(BOOL finished) {
 	      [mainView removeFromSuperview];
@@ -236,16 +282,14 @@
     ];
   }
   else {
-    mainView.frame = CGRectMake(0, (-1 * bannerHeight) - 10, screenWidth, bannerHeight);
+    mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
     [mainView removeFromSuperview];
     topWindow.hidden = YES;
     _alive = NO;
   }
-  [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                  name:@"AVSystemController_SystemVolumeDidChangeNotification"
-                                                object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
 
-  if(_slide) {
+  if(_slide && !_statusBar) {
     [handle removeGestureRecognizer:swipeRecognizer];
     [mainView removeGestureRecognizer:swipeRecognizer];
   }

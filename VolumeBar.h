@@ -23,13 +23,23 @@
 	_UIBackdropViewSettings *blurSettings;
 	UISwipeGestureRecognizer *swipeRecognizer;
 	UIView *handle;
+	UIImage *thumbImage;
+	UILabel *label;
 
 	GMPVolumeView *volumeSlider;
 	UISlider *ringerSlider;
   CGFloat screenWidth;
   CGFloat screenHeight;
+
+	CGFloat bannerWidth;
+	CGFloat bannerX;
   CGFloat bannerHeight;
-  CGFloat sliderPadding;
+	CGFloat bannerY;
+
+	CGFloat sliderWidth;
+  CGFloat sliderX;
+	CGFloat sliderHeight;
+	CGFloat sliderY;
 
 	BOOL _alive;
 	id _view;
@@ -42,9 +52,12 @@
 @property (nonatomic) BOOL showRouteButton;
 @property (nonatomic) BOOL blur;
 @property (nonatomic) BOOL drop;
+@property (nonatomic) BOOL statusBar;
 @property (nonatomic) BOOL slide;
+@property (nonatomic) BOOL label;
 @property (nonatomic) double delayTime;
 @property (nonatomic) double speed;
+@property (nonatomic) double height;
 @property (nonatomic) int blurStyle;
 @property (nonatomic, strong) UIColor *color;
 
@@ -54,6 +67,7 @@
 -(void)swipeHandler:(UISwipeGestureRecognizer *)recognizer;
 -(void)ringerSliderAction:(id)sender;
 -(void)ringerChanged:(NSNotification *)notification;
+-(void)calculateRender;
 -(void)createHUD;
 -(void)showHUD;
 -(void)hideHUD;

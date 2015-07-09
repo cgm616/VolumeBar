@@ -25,9 +25,12 @@ BOOL userInteraction;
 BOOL showRouteButton;
 BOOL blur;
 BOOL drop;
+BOOL statusBar;
 BOOL slide;
+BOOL label;
 double delayTime;
 double speed;
+double height;
 int blurStyle;
 UIColor *color;
 
@@ -67,8 +70,14 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 	key = preferences[@"drop"];
   drop = key ? [key boolValue] : 0;
 
+	key = preferences[@"statusBar"];
+	statusBar = key ? [key boolValue] : 0;
+
 	key = preferences[@"slide"];
 	slide = key ? [key boolValue] : 1;
+
+	key = preferences[@"label"];
+	label = key ? [key boolValue] : 0;
 
   key = preferences[@"timeon"];
   delayTime = key ? [key doubleValue] : 5.0;
@@ -76,9 +85,12 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
   key = preferences[@"animatetime"];
   speed = key ? [key doubleValue] : 0.2;
 
+	key = preferences[@"height"];
+  height = key ? [key doubleValue] : 1.0;
+
   key = preferences[@"blurstyle"];
   blurStyle = key ? [key intValue] : 2;
-	
+
   color = colorFromDefaultsWithKey(@"me.cgm616.volumebar", @"bannercolor", @"#ffffff");
 }
 
@@ -98,9 +110,12 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 		vbar.showRouteButton = showRouteButton;
 		vbar.blur = blur;
 		vbar.drop = drop;
+		vbar.statusBar = statusBar;
 		vbar.slide = slide;
+		vbar.label = label;
 		vbar.delayTime = delayTime;
 		vbar.speed = speed;
+		vbar.height = height;
 		vbar.blurStyle = blurStyle;
 		[vbar loadHUDWithView:view];
   }
@@ -118,9 +133,12 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 		vbar.showRouteButton = showRouteButton;
 		vbar.blur = blur;
 		vbar.drop = drop;
+		vbar.statusBar = statusBar;
 		vbar.slide = slide;
+		vbar.label = label;
 		vbar.delayTime = delayTime;
 		vbar.speed = speed;
+		vbar.height = height;
 		vbar.blurStyle = blurStyle;
 		[vbar loadHUDWithView:view];
   }
