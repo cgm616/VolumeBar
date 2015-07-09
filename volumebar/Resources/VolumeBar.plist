@@ -34,6 +34,8 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>footerText</key>
+      <string>© Copyright 2015 cgm616</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -96,12 +98,6 @@
       <string></string>
 	    <key>detail</key>
 	    <string>VolumeBarAboutListController</string>
-    </dict>
-		<dict>
-      <key>cell</key>
-      <string>PSGroupCell</string>
-      <key>footerText</key>
-      <string>© Copyright 2015 cgm616</string>
     </dict>
 	</array>
 </dict>
