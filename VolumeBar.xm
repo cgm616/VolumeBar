@@ -100,13 +100,15 @@
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
   [volumeControl _changeVolumeBy:delta];
+  [slider release];
 }
 
 -(void)ringerChanged:(NSNotification *)notification {
-  NSDictionary*dict=notification.userInfo;
+  NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
   NSLog(@"Ringer changed with buttons, currently: %f", value);
+  [dict release];
 }
 
 -(void)calculateRender {
@@ -185,6 +187,7 @@
     [blurView setBlursWithHardEdges:YES];
     [blurView setBlurQuality:@"default"];
     [mainView addSubview:blurView];
+    [blurView release];
   }
 
   if([_view mode] == 1) {
@@ -234,11 +237,22 @@
     label.textAlignment = NSTextAlignmentCenter;
     label.font = [UIFont systemFontOfSize:12];
     [mainView addSubview:label];
+    [label release];
   }
 
   mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
 
   _alive = YES;
+}
+
+-(void)destroyHUD {
+  [ringerSlider release];
+  [volumeSlider release];
+  [swipeRecognizer release];
+  [handle release];
+  [mainView release];
+  [topWindow release];
+  _alive = NO;
 }
 
 -(void)showHUD {
@@ -266,6 +280,12 @@
 }
 
 -(void)hideHUD {
+
+  if(_slide && !_statusBar) {
+    [handle removeGestureRecognizer:swipeRecognizer];
+    [mainView removeGestureRecognizer:swipeRecognizer];
+  }
+
   NSLog(@"hideHUD");
   if(_animate) {
     [UIView animateWithDuration:_speed
@@ -277,7 +297,8 @@
 	    completion:^(BOOL finished) {
 	      [mainView removeFromSuperview];
 	      topWindow.hidden = YES;
-        _alive = NO;
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+        [self destroyHUD];
 	    }
     ];
   }
@@ -285,13 +306,8 @@
     mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
     [mainView removeFromSuperview];
     topWindow.hidden = YES;
-    _alive = NO;
-  }
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
-
-  if(_slide && !_statusBar) {
-    [handle removeGestureRecognizer:swipeRecognizer];
-    [mainView removeGestureRecognizer:swipeRecognizer];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+    [self destroyHUD];
   }
 }
 

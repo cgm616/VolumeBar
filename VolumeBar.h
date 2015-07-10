@@ -69,6 +69,7 @@
 -(void)ringerChanged:(NSNotification *)notification;
 -(void)calculateRender;
 -(void)createHUD;
+-(void)destroyHUD;
 -(void)showHUD;
 -(void)hideHUD;
 -(void)loadHUDWithView:(id)view;

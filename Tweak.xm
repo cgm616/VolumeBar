@@ -92,6 +92,8 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
   blurStyle = key ? [key intValue] : 2;
 
   color = colorFromDefaultsWithKey(@"me.cgm616.volumebar", @"bannercolor", @"#ffffff");
+
+	[preferences release];
 }
 
 %ctor {
