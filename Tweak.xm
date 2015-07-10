@@ -35,18 +35,17 @@ int blurStyle;
 UIColor *color;
 
 static void initPrefs() {
-	[preferences release];
 	CFStringRef appID = CFSTR("me.cgm616.volumebar");
 	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 	if (!keyList) {
-		NSLog(@"There's been an error getting the key list!");
+		NSLog(@"VolumeBar: There's been an error getting the key list!");
 		return;
 	}
 	preferences = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 	if (!preferences) {
-		NSLog(@"There's been an error getting the preferences dictionary!");
+		NSLog(@"VolumeBar: There's been an error getting the preferences dictionary!");
 	}
-  NSLog(@"VolumeBar prefs dictionary has been updated to: %@", preferences);
+  NSLog(@"VolumeBar: Prefs dictionary has been updated to: %@", preferences);
 	CFRelease(keyList);
 }
 
