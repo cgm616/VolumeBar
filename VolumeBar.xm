@@ -33,7 +33,7 @@
 @synthesize height = _height;
 @synthesize blurStyle = _blurStyle;
 
-+(VolumeBar*)sharedInstance {
++(VolumeBar*)sharedInstance { // sharedInstance keeps the same object between views, so no alloc/init in Tweak.xm
   static dispatch_once_t p = 0;
   __strong static id _sharedObject = nil;
   dispatch_once(&p, ^{
@@ -42,78 +42,27 @@
   return _sharedObject;
 }
 
-/*
--(void)orientationChanged:(NSNotification *)notification {
-  NSLog(@"Orientation changed");
-  [self adjustViewsForOrientation:[[UIApplication sharedApplication] statusBarOrientation]];
-}
-
--(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation {
-  switch (orientation)
-  {
-    case UIInterfaceOrientationPortrait:
-    {
-      NSLog(@"Orientation portrait");
-      topWindow.frame = CGRectMake(0, 0, screenWidth, bannerHeight);
-      mainView.frame = CGRectMake(0, 0, screenWidth, bannerHeight);
-      volumeSlider.frame = CGRectMake(sliderPadding, 0, screenWidth - (2 * sliderPadding), bannerHeight);
-    }
-    break;
-    case UIInterfaceOrientationPortraitUpsideDown:
-    {
-      NSLog(@"Orientation portrait upside down");
-      topWindow.frame = CGRectMake(screenWidth, screenHeight, 0, screenHeight - bannerHeight);
-      mainView.frame = CGRectMake(screenWidth, screenHeight, 0, screenHeight - bannerHeight);
-      volumeSlider.frame = CGRectMake(screenWidth - sliderPadding, screenHeight, 2 * sliderPadding, screenHeight - bannerHeight);
-    }
-    break;
-    case UIInterfaceOrientationLandscapeLeft:
-    {
-      NSLog(@"Orientation landscape left");
-      topWindow.frame = CGRectMake(screenHeight, 0, 0, screenWidth - bannerHeight);
-      mainView.frame = CGRectMake(screenHeight, 0, 0, screenWidth - bannerHeight);
-      volumeSlider.frame = CGRectMake(screenHeight - sliderPadding, 0, 2 * sliderPadding, bannerHeight);
-    }
-    break;
-    case UIInterfaceOrientationLandscapeRight: // TODO: finish doing these orientations
-    {
-      NSLog(@"Orientation landscape right");
-      topWindow.frame = CGRectMake(screenWidth, screenHeight, 0, screenHeight - bannerHeight);
-      mainView.frame = CGRectMake(screenWidth, screenHeight, 0, screenHeight - bannerHeight);
-      volumeSlider.frame = CGRectMake(screenWidth - sliderPadding, screenHeight, 0 + (2 * sliderPadding), screenHeight - bannerHeight);
-    }
-    break;
-    case UIInterfaceOrientationUnknown:break;
-  }
-}
-*/
-
--(void)swipeHandler:(UITapGestureRecognizer *)gestureRecognizer {
-  NSLog(@"swipeHandler called");
+-(void)swipeHandler:(UITapGestureRecognizer *)gestureRecognizer { // stops hide timer and calls hideHUD when swiped
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideHUD) object:nil];
   [self hideHUD];
 }
 
--(void)ringerSliderAction:(id)sender {
+-(void)ringerSliderAction:(id)sender { // updates volume when ringer slider changed TODO: make less resource instensive
   UISlider *slider = (UISlider*)sender;
-  NSLog(@"Slider value is: %f", slider.value);
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
   [volumeControl _changeVolumeBy:delta];
   [slider release];
 }
 
--(void)ringerChanged:(NSNotification *)notification {
+-(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
-  NSLog(@"Ringer changed with buttons, currently: %f", value);
   [dict release];
 }
 
--(void)calculateRender {
-  NSLog(@"calculateRender");
-
+-(void)calculateRender { // does frame calculations and creates thumbImage
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
@@ -143,31 +92,27 @@
   }
 
   if(_label && !_statusBar) {
-    sliderY = 14;
+    sliderY = sliderY + 14;
     bannerHeight = bannerHeight + sliderY;
   }
 }
 
--(void)createHUD {
-  NSLog(@"createHUD");
-
+-(void)createHUD { // creates view heirarchy
   [self calculateRender];
 
-  // create window to show when HUD fires
-  topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)];
+  topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)]; // window to display on screen
   topWindow.windowLevel = UIWindowLevelStatusBar;
   topWindow.backgroundColor = [UIColor clearColor];
   [topWindow setUserInteractionEnabled:YES];
   [topWindow makeKeyAndVisible];
   topWindow.hidden = YES;
 
-  // create the superview for everything else
-  mainView = [[UIView alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)];
+  mainView = [[UIView alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)]; // top level view for everything else
   [mainView setBackgroundColor:_color];
   [mainView setUserInteractionEnabled:YES];
   [topWindow addSubview:mainView];
 
-  if(_drop) {
+  if(_drop) { // create drop shadow then add it to the mainView
     UIBezierPath *shadowPath = [UIBezierPath bezierPathWithRect:mainView.bounds];
     mainView.layer.masksToBounds = NO;
     mainView.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -176,10 +121,10 @@
     mainView.layer.shadowPath = shadowPath.CGPath;
   }
 
-  if(_blur) {
-    [mainView setBackgroundColor:[UIColor clearColor]]; // if blurred, change color to clear
+  if(_blur) { // create blur view and add to mainView
+    [mainView setBackgroundColor:[UIColor clearColor]];
 
-    blurSettings = [_UIBackdropViewSettings settingsForStyle:_blurStyle]; // set up blur depending on prefs, 0 = light, 2 = default, 1 = dark
+    blurSettings = [_UIBackdropViewSettings settingsForStyle:_blurStyle]; // 0 = light, 2 = default, 1 = dark
     blurView = [[_UIBackdropView alloc] initWithFrame:CGRectMake(0, 0, screenWidth, bannerHeight) autosizesToFitSuperview:YES settings:blurSettings];
     [blurView setBlurRadiusSetOnce:NO];
     [blurView setBlurRadius:10.0];
@@ -190,8 +135,7 @@
     [blurView release];
   }
 
-  if([_view mode] == 1) {
-    NSLog(@"view mode = 1, showing ringer slider");
+  if([_view mode] == 1) { // view mode 1 is ringer, 0 is player
     ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
     ringerSlider.continuous = YES;
     ringerSlider.value = [[NSClassFromString(@"VolumeControl") sharedVolumeControl] volume];
@@ -200,25 +144,24 @@
     [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
     [ringerSlider setBackgroundColor:[UIColor clearColor]];
     [ringerSlider setUserInteractionEnabled:_userInteraction];
-    if(_statusBar) {
+    if(_statusBar) { // add no thumb image
       [ringerSlider setThumbImage:thumbImage forState:UIControlStateNormal];
     }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ringerChanged:) name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
     [mainView addSubview:ringerSlider];
   }
   else {
-    NSLog(@"view mode = 0, showing GMPVolumeView");
     volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
     [volumeSlider setBackgroundColor:[UIColor clearColor]];
     [volumeSlider setUserInteractionEnabled:_userInteraction];
     volumeSlider.showsRouteButton = (_showRouteButton || !_statusBar);
-    if(_statusBar) {
+    if(_statusBar) { // add no thumb image
       [volumeSlider setVolumeThumbImage:thumbImage forState:UIControlStateNormal];
     }
     [mainView addSubview:volumeSlider];
   }
 
-  if(_slide && !_statusBar) {
+  if(_slide && !_statusBar) { // set up swipe handler and create handle view, add to mainView
     handle = [[UIView alloc] initWithFrame:CGRectMake((screenWidth / 2) - 16, bannerHeight - 10, 32, 8)];
     [handle setBackgroundColor:[UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]];
     handle.layer.cornerRadius = 4;
@@ -228,11 +171,11 @@
     [swipeRecognizer setDirection:UISwipeGestureRecognizerDirectionUp];
   }
 
-  if(_label && !_statusBar) {
+  if(_label && !_statusBar) { // add label depending on mode, add to mainView
     label = [[UILabel alloc] initWithFrame:CGRectMake(bannerX, bannerY + 2, bannerWidth, sliderY)];
     [label setBackgroundColor:[UIColor clearColor]];
     label.text = [_view mode] == 1 ? @"Ringer" : @"Player";
-    label.textColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+    label.textColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]; // TODO: make text white when needed for contrast
 
     label.textAlignment = NSTextAlignmentCenter;
     label.font = [UIFont systemFontOfSize:12];
@@ -240,12 +183,12 @@
     [label release];
   }
 
-  mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight);
+  mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight); // hide frame for animation in
 
   _alive = YES;
 }
 
--(void)destroyHUD {
+-(void)destroyHUD { // release all allocated objects when done with banner
   [ringerSlider release];
   [volumeSlider release];
   [swipeRecognizer release];
@@ -255,8 +198,7 @@
   _alive = NO;
 }
 
--(void)showHUD {
-  NSLog(@"showHUD");
+-(void)showHUD { // animate banner in, set up gestures to work
   topWindow.hidden = NO;
   if(_animate) {
     [UIView animateWithDuration:_speed
@@ -279,14 +221,12 @@
   }
 }
 
--(void)hideHUD {
-
+-(void)hideHUD { // animate gestures out, remove gestures, call destroyHUD
   if(_slide && !_statusBar) {
     [handle removeGestureRecognizer:swipeRecognizer];
     [mainView removeGestureRecognizer:swipeRecognizer];
   }
 
-  NSLog(@"hideHUD");
   if(_animate) {
     [UIView animateWithDuration:_speed
 	    delay:0
@@ -311,20 +251,13 @@
   }
 }
 
--(void)loadHUDWithView:(id)view {
-  // [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
-
+-(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
   if(!_alive) {
-    NSLog(@"loadHUD, currently dead");
-
     _view = view;
     [self createHUD];
     [self showHUD];
 
     [self performSelector:@selector(hideHUD) withObject:nil afterDelay:_delayTime];
-  }
-  else {
-    NSLog(@"loadHUD, currently alive");
   }
 }
 
