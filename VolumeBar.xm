@@ -62,7 +62,7 @@
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
-  [dict release];
+  // [dict release];
 }
 
 -(void)calculateRender { // does frame calculations and creates thumbImage
