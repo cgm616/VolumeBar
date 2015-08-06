@@ -43,11 +43,13 @@
 }
 
 -(void)swipeHandler:(UITapGestureRecognizer *)gestureRecognizer { // stops hide timer and calls hideHUD when swiped
+  NSLog(@"swipeHandler called");
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideHUD) object:nil];
   [self hideHUD];
 }
 
 -(void)ringerSliderAction:(id)sender { // updates volume when ringer slider changed TODO: make less resource instensive
+  NSLog(@"ringerSliderAction called");
   UISlider *slider = (UISlider*)sender;
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
@@ -56,6 +58,7 @@
 }
 
 -(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
+  NSLog(@"ringerChanged called");
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
@@ -63,6 +66,7 @@
 }
 
 -(void)calculateRender { // does frame calculations and creates thumbImage
+  NSLog(@"calculateRender called");
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
@@ -98,6 +102,7 @@
 }
 
 -(void)createHUD { // creates view heirarchy
+  NSLog(@"createHUD called");
   [self calculateRender];
 
   topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)]; // window to display on screen
@@ -189,6 +194,7 @@
 }
 
 -(void)destroyHUD { // release all allocated objects when done with banner
+  NSLog(@"destroyHUD called");
   // [ringerSlider release];
   [volumeSlider release];
   [swipeRecognizer release];
@@ -199,6 +205,7 @@
 }
 
 -(void)showHUD { // animate banner in, set up gestures to work
+  NSLog(@"showHUD called");
   topWindow.hidden = NO;
   if(_animate) {
     [UIView animateWithDuration:_speed
@@ -222,6 +229,7 @@
 }
 
 -(void)hideHUD { // animate gestures out, remove gestures, call destroyHUD
+  NSLog(@"hideHUD called");
   if(_slide && !_statusBar) {
     [handle removeGestureRecognizer:swipeRecognizer];
     [mainView removeGestureRecognizer:swipeRecognizer];
@@ -252,6 +260,7 @@
 }
 
 -(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
+  NSLog(@"loadHUDWithView called");
   if(!_alive) {
     _view = view;
     [self createHUD];
