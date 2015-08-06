@@ -121,7 +121,7 @@ static BOOL settingsChanged;
 }
 
 -(void)twitterButton4 {
-  NSString *user = @"uroboro";
+  NSString *user = @"uroboro845";
   if([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]])
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:user]]];
 
