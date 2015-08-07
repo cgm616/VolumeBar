@@ -54,7 +54,7 @@
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
   [volumeControl _changeVolumeBy:delta];
-  [slider release];
+  // [slider release];
 }
 
 -(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
@@ -262,11 +262,15 @@
 -(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
   NSLog(@"loadHUDWithView called");
   if(!_alive) {
+    NSLog(@"Shwoing HUD");
     _view = view;
     [self createHUD];
     [self showHUD];
 
     [self performSelector:@selector(hideHUD) withObject:nil afterDelay:_delayTime];
+  }
+  else {
+    NSLog(@"Not showing hud");
   }
 }
 
