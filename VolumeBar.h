@@ -14,6 +14,7 @@
 #import "GMPVolumeView.h"
 #import "UIBackdropView.h"
 #import "VolumeControl.h"
+#import <SpringBoard/SBBrightnessController.h>
 #include <tgmath.h>
 
 @interface VolumeBar : NSObject {
@@ -28,6 +29,7 @@
 
 	GMPVolumeView *volumeSlider;
 	UISlider *ringerSlider;
+	UISlider *brightnessSlider;
   CGFloat screenWidth;
   CGFloat screenHeight;
 
@@ -45,6 +47,7 @@
 	id _view;
 
 	VolumeControl *volumeControl;
+	SBBrightnessController *brightnessController;
 }
 
 @property (nonatomic) BOOL animate;
@@ -55,6 +58,7 @@
 @property (nonatomic) BOOL statusBar;
 @property (nonatomic) BOOL slide;
 @property (nonatomic) BOOL label;
+@property (nonatomic) BOOL brightness;
 @property (nonatomic) double delayTime;
 @property (nonatomic) double speed;
 @property (nonatomic) double height;
@@ -67,6 +71,7 @@
 -(void)swipeHandler:(UISwipeGestureRecognizer *)recognizer;
 -(void)ringerSliderAction:(id)sender;
 -(void)ringerChanged:(NSNotification *)notification;
+-(void)brightnessSliderAction:(id)sender;
 -(void)calculateRender;
 -(void)createHUD;
 -(void)destroyHUD;

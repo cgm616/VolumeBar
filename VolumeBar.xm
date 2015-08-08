@@ -15,6 +15,7 @@
 #import "GMPVolumeView.h"
 #import "UIBackdropView.h"
 #import "VolumeControl.h"
+#import <SpringBoard/SBBrightnessController.h>
 #include <tgmath.h>
 
 @implementation VolumeBar
@@ -28,6 +29,7 @@
 @synthesize statusBar = _statusBar;
 @synthesize slide = _slide;
 @synthesize label = _label;
+@synthesize brightness = _brightness;
 @synthesize delayTime = _delayTime;
 @synthesize speed = _speed;
 @synthesize height = _height;
@@ -63,6 +65,14 @@
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
   // [dict release];
+}
+
+-(void)brightnessSliderAction:(id)sender { // updates brightness when brightness slider changed
+  NSLog(@"brightnessSliderAction called");
+  UISlider *slider = (UISlider*)sender;
+  // [[UIScreen mainScreen] setBrightness:slider.value];
+  brightnessController = [NSClassFromString(@"SBBrightnessController") sharedBrightnessController];
+  [brightnessController _setBrightnessLevel:slider.value showHUD:NO];
 }
 
 -(void)calculateRender { // does frame calculations and creates thumbImage
@@ -140,31 +150,48 @@
     [blurView release];
   }
 
-  if([_view mode] == 1) { // view mode 1 is ringer, 0 is player
-    ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
-    ringerSlider.continuous = YES;
-    ringerSlider.value = [[NSClassFromString(@"VolumeControl") sharedVolumeControl] volume];
-    ringerSlider.minimumValue = 0;
-    ringerSlider.maximumValue = 1.0;
-    [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
-    [ringerSlider setBackgroundColor:[UIColor clearColor]];
-    [ringerSlider setUserInteractionEnabled:_userInteraction];
-    if(_statusBar) { // add no thumb image
-      [ringerSlider setThumbImage:thumbImage forState:UIControlStateNormal];
+  if(!_brightness) {
+    if([_view mode] == 1) { // view mode 1 is ringer, 0 is player
+      ringerSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
+      ringerSlider.continuous = YES;
+      ringerSlider.value = [[NSClassFromString(@"VolumeControl") sharedVolumeControl] volume];
+      ringerSlider.minimumValue = 0;
+      ringerSlider.maximumValue = 1.0;
+      [ringerSlider addTarget:self action:@selector(ringerSliderAction:) forControlEvents:UIControlEventValueChanged];
+      [ringerSlider setBackgroundColor:[UIColor clearColor]];
+      [ringerSlider setUserInteractionEnabled:_userInteraction];
+      if(_statusBar) { // add no thumb image
+        [ringerSlider setThumbImage:thumbImage forState:UIControlStateNormal];
+      }
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ringerChanged:) name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+      [mainView addSubview:ringerSlider];
     }
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ringerChanged:) name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
-    [mainView addSubview:ringerSlider];
+    else {
+      volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
+      [volumeSlider setBackgroundColor:[UIColor clearColor]];
+      [volumeSlider setUserInteractionEnabled:_userInteraction];
+      volumeSlider.showsRouteButton = (_showRouteButton || !_statusBar);
+      if(_statusBar) { // add no thumb image
+        [volumeSlider setVolumeThumbImage:thumbImage forState:UIControlStateNormal];
+      }
+      [mainView addSubview:volumeSlider];
+    }
   }
   else {
-    volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
-    [volumeSlider setBackgroundColor:[UIColor clearColor]];
-    [volumeSlider setUserInteractionEnabled:_userInteraction];
-    volumeSlider.showsRouteButton = (_showRouteButton || !_statusBar);
+    brightnessSlider = [[UISlider alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
+    brightnessSlider.continuous = YES;
+    brightnessSlider.minimumValue = 0;
+    brightnessSlider.maximumValue = 1.0;
+    brightnessSlider.value = [UIScreen mainScreen].brightness;
+    [brightnessSlider addTarget:self action:@selector(brightnessSliderAction:) forControlEvents:UIControlEventValueChanged];
+    [brightnessSlider setBackgroundColor:[UIColor clearColor]];
+    [brightnessSlider setUserInteractionEnabled:_userInteraction];
     if(_statusBar) { // add no thumb image
-      [volumeSlider setVolumeThumbImage:thumbImage forState:UIControlStateNormal];
+      [brightnessSlider setThumbImage:thumbImage forState:UIControlStateNormal];
     }
-    [mainView addSubview:volumeSlider];
+    [mainView addSubview:brightnessSlider];
   }
+
 
   if(_slide && !_statusBar) { // set up swipe handler and create handle view, add to mainView
     handle = [[UIView alloc] initWithFrame:CGRectMake((screenWidth / 2) - 16, bannerHeight - 10, 32, 8)];
@@ -179,9 +206,13 @@
   if(_label && !_statusBar) { // add label depending on mode, add to mainView
     label = [[UILabel alloc] initWithFrame:CGRectMake(bannerX, bannerY + 2, bannerWidth, sliderY)];
     [label setBackgroundColor:[UIColor clearColor]];
-    label.text = [_view mode] == 1 ? @"Ringer" : @"Player";
+    if(!_brightness) {
+      label.text = [_view mode] == 1 ? @"Ringer" : @"Player";
+    }
+    else {
+      label.text = @"Brightness";
+    }
     label.textColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5]; // TODO: make text white when needed for contrast
-
     label.textAlignment = NSTextAlignmentCenter;
     label.font = [UIFont systemFontOfSize:12];
     [mainView addSubview:label];
