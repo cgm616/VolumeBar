@@ -193,32 +193,37 @@
   switch (orientation) {
     case UIInterfaceOrientationPortraitUpsideDown:
     {
-      transform = CGAffineTransformMakeRotation(M_PI);
       NSLog(@"Portrait upside down");
+      transform = CGAffineTransformMakeRotation(M_PI);
+      windowCenter = CGPointMake(bannerWidth / 2, screenHeight - (bannerHeight / 2));
     } break;
 
     case UIInterfaceOrientationLandscapeLeft:
     {
       NSLog(@"Landscape left");
       transform = CGAffineTransformMakeRotation(M_PI / -2);
+      windowCenter = CGPointMake(bannerHeight / 2, screenHeight / 2);
     }break;
 
     case UIInterfaceOrientationLandscapeRight:
     {
       NSLog(@"Landscape right");
       transform = CGAffineTransformMakeRotation(M_PI / 2);
+      windowCenter = CGPointMake(screenWidth - (bannerHeight / 2), screenHeight / 2);
     } break;
 
     case UIInterfaceOrientationUnknown:
     case UIInterfaceOrientationPortrait:
     default:
     {
-      NSLog(@"Portrait. no change");
+      NSLog(@"Portrait, no change");
       transform = CGAffineTransformMakeRotation(0);
+      windowCenter = topWindow.center;
     }break;
   }
 
   [topWindow setTransform:transform];
+  topWindow.center = windowCenter;
 
   _alive = YES;
 }

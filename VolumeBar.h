@@ -22,7 +22,6 @@
 	_UIBackdropView *blurView;
 	_UIBackdropViewSettings *blurSettings;
 	UISwipeGestureRecognizer *swipeRecognizer;
-	CGAffineTransform transform;
 	UIView *handle;
 	UIImage *thumbImage;
 	UILabel *label;
@@ -41,6 +40,9 @@
   CGFloat sliderX;
 	CGFloat sliderHeight;
 	CGFloat sliderY;
+
+	CGPoint windowCenter;
+	CGAffineTransform transform;
 
 	BOOL _alive;
 	id _view;
