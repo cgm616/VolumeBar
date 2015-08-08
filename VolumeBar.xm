@@ -276,8 +276,8 @@
 	    completion:^(BOOL finished) {
 	      [mainView removeFromSuperview];
 	      topWindow.hidden = YES;
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
-	[self destroyHUD];
+	      [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+	      [self destroyHUD];
 	    }
     ];
   }
