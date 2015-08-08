@@ -170,7 +170,7 @@
       volumeSlider = [[GMPVolumeView alloc] initWithFrame:CGRectMake(sliderX, sliderY, sliderWidth, sliderHeight)];
       [volumeSlider setBackgroundColor:[UIColor clearColor]];
       [volumeSlider setUserInteractionEnabled:_userInteraction];
-      volumeSlider.showsRouteButton = (_showRouteButton || !_statusBar);
+      volumeSlider.showsRouteButton = (_showRouteButton && !_statusBar);
       if(_statusBar) { // add no thumb image
         [volumeSlider setVolumeThumbImage:thumbImage forState:UIControlStateNormal];
       }
