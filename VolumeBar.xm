@@ -54,7 +54,6 @@
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
   [volumeControl _changeVolumeBy:delta];
-  // [slider release];
 }
 
 -(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
@@ -62,7 +61,6 @@
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
-  // [dict release];
 }
 
 -(void)calculateRender { // does frame calculations and creates thumbImage
@@ -70,6 +68,24 @@
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
+
+  UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+
+  switch (orientation) {
+    case UIInterfaceOrientationPortrait:
+    case UIInterfaceOrientationPortraitUpsideDown:
+    {
+      NSLog(@"Portrait");
+    } break;
+
+    case UIInterfaceOrientationLandscapeLeft:
+    case UIInterfaceOrientationLandscapeRight:
+    {
+      NSLog(@"Landscape");
+    } break;
+
+    case UIInterfaceOrientationUnknown:break;
+  }
 
   bannerX = 0;
   bannerWidth = screenWidth;
@@ -195,7 +211,6 @@
 
 -(void)destroyHUD { // release all allocated objects when done with banner
   NSLog(@"destroyHUD called");
-  // [ringerSlider release];
   [volumeSlider release];
   [swipeRecognizer release];
   [handle release];
@@ -262,15 +277,11 @@
 -(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
   NSLog(@"loadHUDWithView called");
   if(!_alive) {
-    NSLog(@"Shwoing HUD");
     _view = view;
     [self createHUD];
     [self showHUD];
 
     [self performSelector:@selector(hideHUD) withObject:nil afterDelay:_delayTime];
-  }
-  else {
-    NSLog(@"Not showing hud");
   }
 }
 
