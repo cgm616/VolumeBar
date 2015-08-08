@@ -69,24 +69,6 @@
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
 
-  UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
-
-  switch (orientation) {
-    case UIInterfaceOrientationPortrait:
-    case UIInterfaceOrientationPortraitUpsideDown:
-    {
-      NSLog(@"Portrait");
-    } break;
-
-    case UIInterfaceOrientationLandscapeLeft:
-    case UIInterfaceOrientationLandscapeRight:
-    {
-      NSLog(@"Landscape");
-    } break;
-
-    case UIInterfaceOrientationUnknown:break;
-  }
-
   bannerX = 0;
   bannerWidth = screenWidth;
 	bannerY = 0;
@@ -205,6 +187,38 @@
   }
 
   mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight); // hide frame for animation in
+
+  UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+
+  switch (orientation) {
+    case UIInterfaceOrientationPortraitUpsideDown:
+    {
+      transform = CGAffineTransformMakeRotation(M_PI);
+      NSLog(@"Portrait upside down");
+    } break;
+
+    case UIInterfaceOrientationLandscapeLeft:
+    {
+      NSLog(@"Landscape left");
+      transform = CGAffineTransformMakeRotation(M_PI / -2);
+    }break;
+
+    case UIInterfaceOrientationLandscapeRight:
+    {
+      NSLog(@"Landscape right");
+      transform = CGAffineTransformMakeRotation(M_PI / 2);
+    } break;
+
+    case UIInterfaceOrientationUnknown:
+    case UIInterfaceOrientationPortrait:
+    default:
+    {
+      NSLog(@"Portrait. no change");
+      transform = CGAffineTransformMakeRotation(0);
+    }break;
+  }
+
+  [topWindow setTransform:transform];
 
   _alive = YES;
 }

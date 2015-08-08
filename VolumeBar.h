@@ -22,6 +22,7 @@
 	_UIBackdropView *blurView;
 	_UIBackdropViewSettings *blurSettings;
 	UISwipeGestureRecognizer *swipeRecognizer;
+	CGAffineTransform transform;
 	UIView *handle;
 	UIImage *thumbImage;
 	UILabel *label;
