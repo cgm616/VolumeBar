@@ -63,6 +63,55 @@
   [ringerSlider setValue:value animated:YES];
 }
 
+-(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation animated:(BOOL)animateOrient{
+  switch (orientation) {
+    case UIInterfaceOrientationPortraitUpsideDown:
+    {
+      NSLog(@"Portrait upside down");
+      transform = CGAffineTransformMakeRotation(M_PI);
+      windowCenter = CGPointMake(bannerWidth / 2, screenHeight - (bannerHeight / 2));
+    } break;
+
+    case UIInterfaceOrientationLandscapeLeft:
+    {
+      NSLog(@"Landscape left");
+      transform = CGAffineTransformMakeRotation(M_PI / -2);
+      windowCenter = CGPointMake(bannerHeight / 2, screenHeight / 2);
+    }break;
+
+    case UIInterfaceOrientationLandscapeRight:
+    {
+      NSLog(@"Landscape right");
+      transform = CGAffineTransformMakeRotation(M_PI / 2);
+      windowCenter = CGPointMake(screenWidth - (bannerHeight / 2), screenHeight / 2);
+    } break;
+
+    case UIInterfaceOrientationUnknown:
+    case UIInterfaceOrientationPortrait:
+    default:
+    {
+      NSLog(@"Portrait, no change");
+      transform = CGAffineTransformMakeRotation(0);
+      windowCenter = CGPointMake(screenWidth / 2, bannerHeight / 2);
+    }break;
+  }
+
+  if(animateOrient) {
+    [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+      [topWindow setTransform:transform];
+      topWindow.center = windowCenter;
+    } completion:nil];
+  }
+  else {
+    [topWindow setTransform:transform];
+    topWindow.center = windowCenter;
+  }
+}
+
+-(void)orientationChanged:(NSNotification *)notification {
+  [self adjustViewsForOrientation:[[notification object] orientation] animated:YES];
+}
+
 -(void)calculateRender { // does frame calculations and creates thumbImage
   NSLog(@"calculateRender called");
   CGRect screenRect = [[UIScreen mainScreen] bounds];
@@ -188,42 +237,9 @@
 
   mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight); // hide frame for animation in
 
-  UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
-
-  switch (orientation) {
-    case UIInterfaceOrientationPortraitUpsideDown:
-    {
-      NSLog(@"Portrait upside down");
-      transform = CGAffineTransformMakeRotation(M_PI);
-      windowCenter = CGPointMake(bannerWidth / 2, screenHeight - (bannerHeight / 2));
-    } break;
-
-    case UIInterfaceOrientationLandscapeLeft:
-    {
-      NSLog(@"Landscape left");
-      transform = CGAffineTransformMakeRotation(M_PI / -2);
-      windowCenter = CGPointMake(bannerHeight / 2, screenHeight / 2);
-    }break;
-
-    case UIInterfaceOrientationLandscapeRight:
-    {
-      NSLog(@"Landscape right");
-      transform = CGAffineTransformMakeRotation(M_PI / 2);
-      windowCenter = CGPointMake(screenWidth - (bannerHeight / 2), screenHeight / 2);
-    } break;
-
-    case UIInterfaceOrientationUnknown:
-    case UIInterfaceOrientationPortrait:
-    default:
-    {
-      NSLog(@"Portrait, no change");
-      transform = CGAffineTransformMakeRotation(0);
-      windowCenter = topWindow.center;
-    }break;
-  }
-
-  [topWindow setTransform:transform];
-  topWindow.center = windowCenter;
+  [self adjustViewsForOrientation:[[UIDevice currentDevice] orientation] animated:NO];
+  [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+  [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
 
   _alive = YES;
 }
@@ -280,6 +296,7 @@
 	      [mainView removeFromSuperview];
 	      topWindow.hidden = YES;
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
 	[self destroyHUD];
 	    }
     ];
@@ -289,6 +306,7 @@
     [mainView removeFromSuperview];
     topWindow.hidden = YES;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
     [self destroyHUD];
   }
 }
