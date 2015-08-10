@@ -56,7 +56,6 @@
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
   [volumeControl _changeVolumeBy:delta];
-  // [slider release];
 }
 
 -(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
@@ -64,7 +63,55 @@
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
-  // [dict release];
+}
+
+-(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation animated:(BOOL)animateOrient{
+  switch (orientation) {
+    case UIInterfaceOrientationPortraitUpsideDown:
+    {
+      NSLog(@"Portrait upside down");
+      transform = CGAffineTransformMakeRotation(M_PI);
+      windowCenter = CGPointMake(bannerWidth / 2, screenHeight - (bannerHeight / 2));
+    } break;
+
+    case UIInterfaceOrientationLandscapeLeft:
+    {
+      NSLog(@"Landscape left");
+      transform = CGAffineTransformMakeRotation(M_PI / -2);
+      windowCenter = CGPointMake(bannerHeight / 2, screenHeight / 2);
+    }break;
+
+    case UIInterfaceOrientationLandscapeRight:
+    {
+      NSLog(@"Landscape right");
+      transform = CGAffineTransformMakeRotation(M_PI / 2);
+      windowCenter = CGPointMake(screenWidth - (bannerHeight / 2), screenHeight / 2);
+    } break;
+
+    case UIInterfaceOrientationUnknown:
+    case UIInterfaceOrientationPortrait:
+    default:
+    {
+      NSLog(@"Portrait, no change");
+      transform = CGAffineTransformMakeRotation(0);
+      windowCenter = CGPointMake(screenWidth / 2, bannerHeight / 2);
+    }break;
+  }
+
+  if(animateOrient) {
+    [UIView animateWithDuration:0.4 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState animations:^{
+      [topWindow setTransform:transform];
+      topWindow.center = windowCenter;
+    } completion:nil];
+  }
+  else {
+    [topWindow setTransform:transform];
+    topWindow.center = windowCenter;
+  }
+}
+
+-(void)orientationChanged:(NSNotification *)notification {
+  [self adjustViewsForOrientation:[[notification object] orientation] animated:YES];
 }
 
 -(void)brightnessSliderAction:(id)sender { // updates brightness when brightness slider changed
@@ -221,12 +268,15 @@
 
   mainView.frame = CGRectMake(bannerX, (-1 * bannerHeight) - 5, bannerWidth, bannerHeight); // hide frame for animation in
 
+  [self adjustViewsForOrientation:[[UIDevice currentDevice] orientation] animated:NO];
+  [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+  [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
+
   _alive = YES;
 }
 
 -(void)destroyHUD { // release all allocated objects when done with banner
   NSLog(@"destroyHUD called");
-  // [ringerSlider release];
   [volumeSlider release];
   [swipeRecognizer release];
   [handle release];
@@ -277,6 +327,7 @@
 	      [mainView removeFromSuperview];
 	      topWindow.hidden = YES;
 	      [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
 	      [self destroyHUD];
 	    }
     ];
@@ -286,6 +337,7 @@
     [mainView removeFromSuperview];
     topWindow.hidden = YES;
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"AVSystemController_SystemVolumeDidChangeNotification" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:[UIDevice currentDevice]];
     [self destroyHUD];
   }
 }
@@ -293,15 +345,11 @@
 -(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
   NSLog(@"loadHUDWithView called");
   if(!_alive) {
-    NSLog(@"Shwoing HUD");
     _view = view;
     [self createHUD];
     [self showHUD];
 
     [self performSelector:@selector(hideHUD) withObject:nil afterDelay:_delayTime];
-  }
-  else {
-    NSLog(@"Not showing hud");
   }
 }
 

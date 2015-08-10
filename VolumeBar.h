@@ -43,6 +43,9 @@
 	CGFloat sliderHeight;
 	CGFloat sliderY;
 
+	CGPoint windowCenter;
+	CGAffineTransform transform;
+
 	BOOL _alive;
 	id _view;
 
@@ -66,12 +69,12 @@
 @property (nonatomic, strong) UIColor *color;
 
 +(VolumeBar*)sharedInstance;
-// -(void)orientationChanged:(NSNotification *)notification;
-// -(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation;
 -(void)swipeHandler:(UISwipeGestureRecognizer *)recognizer;
 -(void)ringerSliderAction:(id)sender;
 -(void)ringerChanged:(NSNotification *)notification;
 -(void)brightnessSliderAction:(id)sender;
+-(void)adjustViewsForOrientation:(UIInterfaceOrientation)orientation animated:(BOOL)animateOrient;
+-(void)orientationChanged:(NSNotification *)notification;
 -(void)calculateRender;
 -(void)createHUD;
 -(void)destroyHUD;
