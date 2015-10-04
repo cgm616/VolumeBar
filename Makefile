@@ -3,7 +3,7 @@ export ARCHS = armv7 arm64
 THEOS_BUILD_DIR = Packages
 PACKAGE_VERSION = $(THEOS_PACKAGE_BASE_VERSION)
 
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = VolumeBar
 VolumeBar_FILES = Tweak.xm VolumeBar.xm GMPVolumeView.xm

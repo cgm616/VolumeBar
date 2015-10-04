@@ -1,4 +1,4 @@
-include theos/makefiles/common.mk
+include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = VolumeBar
 VolumeBar_FILES = VolumeBar.mm
