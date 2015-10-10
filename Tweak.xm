@@ -37,14 +37,14 @@ static void initPrefs() {
 	CFStringRef appID = CFSTR("me.cgm616.volumebar");
 	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 	if (!keyList) {
-		NSLog(@"VolumeBar: There's been an error getting the key list!");
+		HBLogError(@"VolumeBar: There's been an error getting the key list!");
 		return;
 	}
 	preferences = (NSDictionary *)CFPreferencesCopyMultiple(keyList, appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
 	if (!preferences) {
-		NSLog(@"VolumeBar: There's been an error getting the preferences dictionary!");
+		HBLogError(@"VolumeBar: There's been an error getting the preferences dictionary!");
 	}
-  NSLog(@"VolumeBar: Prefs dictionary has been updated to: %@", preferences);
+  HBLogInfo(@"VolumeBar: Prefs dictionary has been updated to: %@", preferences);
 	CFRelease(keyList);
 }
 

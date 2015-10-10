@@ -45,13 +45,13 @@
 }
 
 -(void)swipeHandler:(UITapGestureRecognizer *)gestureRecognizer { // stops hide timer and calls hideHUD when swiped
-  NSLog(@"swipeHandler called");
+  HBLogDebug(@"swipeHandler called");
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(hideHUD) object:nil];
   [self hideHUD];
 }
 
 -(void)ringerSliderAction:(id)sender { // updates volume when ringer slider changed TODO: make less resource instensive
-  NSLog(@"ringerSliderAction called");
+  HBLogDebug(@"ringerSliderAction called");
   UISlider *slider = (UISlider*)sender;
   volumeControl = [NSClassFromString(@"VolumeControl") sharedVolumeControl];
   float delta = slider.value - [volumeControl volume];
@@ -59,7 +59,7 @@
 }
 
 -(void)ringerChanged:(NSNotification *)notification { // handles changing slider value when buttons pressed with ringer
-  NSLog(@"ringerChanged called");
+  HBLogDebug(@"ringerChanged called");
   NSDictionary *dict = notification.userInfo;
   float value = [[dict objectForKey:@"AVSystemController_AudioVolumeNotificationParameter"] floatValue];
   [ringerSlider setValue:value animated:YES];
@@ -69,21 +69,21 @@
   switch (orientation) {
     case UIInterfaceOrientationPortraitUpsideDown:
     {
-      NSLog(@"Portrait upside down");
+      HBLogDebug(@"Portrait upside down");
       transform = CGAffineTransformMakeRotation(M_PI);
       windowCenter = CGPointMake(bannerWidth / 2, screenHeight - (bannerHeight / 2));
     } break;
 
     case UIInterfaceOrientationLandscapeLeft:
     {
-      NSLog(@"Landscape left");
+      HBLogDebug(@"Landscape left");
       transform = CGAffineTransformMakeRotation(M_PI / -2);
       windowCenter = CGPointMake(bannerHeight / 2, screenHeight / 2);
     }break;
 
     case UIInterfaceOrientationLandscapeRight:
     {
-      NSLog(@"Landscape right");
+      HBLogDebug(@"Landscape right");
       transform = CGAffineTransformMakeRotation(M_PI / 2);
       windowCenter = CGPointMake(screenWidth - (bannerHeight / 2), screenHeight / 2);
     } break;
@@ -92,7 +92,7 @@
     case UIInterfaceOrientationPortrait:
     default:
     {
-      NSLog(@"Portrait, no change");
+      HBLogDebug(@"Portrait, no change");
       transform = CGAffineTransformMakeRotation(0);
       windowCenter = CGPointMake(screenWidth / 2, bannerHeight / 2);
     }break;
@@ -115,7 +115,7 @@
 }
 
 -(void)brightnessSliderAction:(id)sender { // updates brightness when brightness slider changed
-  NSLog(@"brightnessSliderAction called");
+  HBLogDebug(@"brightnessSliderAction called");
   UISlider *slider = (UISlider*)sender;
   // [[UIScreen mainScreen] setBrightness:slider.value];
   brightnessController = [NSClassFromString(@"SBBrightnessController") sharedBrightnessController];
@@ -123,7 +123,7 @@
 }
 
 -(void)calculateRender { // does frame calculations and creates thumbImage
-  NSLog(@"calculateRender called");
+  HBLogDebug(@"calculateRender called");
   CGRect screenRect = [[UIScreen mainScreen] bounds];
   screenWidth = screenRect.size.width;
   screenHeight = screenRect.size.height;
@@ -159,7 +159,7 @@
 }
 
 -(void)createHUD { // creates view heirarchy
-  NSLog(@"createHUD called");
+  HBLogDebug(@"createHUD called");
   [self calculateRender];
 
   topWindow = [[UIWindow alloc] initWithFrame:CGRectMake(bannerX, bannerY, bannerWidth, bannerHeight)]; // window to display on screen
@@ -276,7 +276,7 @@
 }
 
 -(void)destroyHUD { // release all allocated objects when done with banner
-  NSLog(@"destroyHUD called");
+  HBLogDebug(@"destroyHUD called");
   [volumeSlider release];
   [swipeRecognizer release];
   [handle release];
@@ -286,7 +286,7 @@
 }
 
 -(void)showHUD { // animate banner in, set up gestures to work
-  NSLog(@"showHUD called");
+  HBLogDebug(@"showHUD called");
   topWindow.hidden = NO;
   if(_animate) {
     [UIView animateWithDuration:_speed
@@ -310,7 +310,7 @@
 }
 
 -(void)hideHUD { // animate gestures out, remove gestures, call destroyHUD
-  NSLog(@"hideHUD called");
+  HBLogDebug(@"hideHUD called");
   if(_slide && !_statusBar) {
     [handle removeGestureRecognizer:swipeRecognizer];
     [mainView removeGestureRecognizer:swipeRecognizer];
@@ -343,7 +343,7 @@
 }
 
 -(void)loadHUDWithView:(id)view { // only method called from Tweak.xm, calls all other methods for setup and hiding
-  NSLog(@"loadHUDWithView called");
+  HBLogDebug(@"loadHUDWithView called");
   if(!_alive) {
     _view = view;
     [self createHUD];
