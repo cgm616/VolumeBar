@@ -15,8 +15,7 @@
 #import "GMPVolumeView.h"
 #include <tgmath.h>
 #import <SpringBoard/SBVolumeHUDView.h>
-
-extern "C" UIColor *colorFromDefaultsWithKey(NSString *defaults, NSString *key, NSString *fallback);
+#import <libcolorpicker/ColorPicker.h>
 
 static NSDictionary *preferences;
 BOOL enabled;
@@ -90,7 +89,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
   key = preferences[@"blurstyle"];
   blurStyle = key ? [key intValue] : 2;
 
-  color = colorFromDefaultsWithKey(@"me.cgm616.volumebar", @"bannercolor", @"#ffffff");
+	color = LCPParseColorString([preferences objectForKey:@"bannercolor"], @"#ffffff");
 
 	[preferences release];
 }

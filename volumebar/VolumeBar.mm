@@ -10,6 +10,10 @@
 #import <Preferences/PSListController.h>
 #import <Preferences/PSTableCell.h>
 #import <Preferences/PSSpecifier.h>
+#import <libcolorpicker/ColorPicker.h>
+#import <libcolorpicker/PFColorAlert.h>
+#import <libcolorpicker/UIColor+PFColor.h>
+#import <UIKit/UIKit.h>
 
 static BOOL settingsChanged;
 
@@ -52,12 +56,15 @@ static BOOL settingsChanged;
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-  [self clearCache];
-  [self reload];
   [super viewWillAppear:animated];
+
 	if(settingsChanged) {
 		[self settingsChanged];
 	}
+}
+
+-(void)viewDidAppear:(BOOL)animated {
+  [super viewDidAppear:animated];
 }
 
 -(void)settingsChanged {
@@ -154,6 +161,30 @@ static BOOL settingsChanged;
 
   else
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:user]]];
+}
+
+-(void)libColorPicker {
+  HBLogDebug(@"libColorPickerAlert called");
+
+  CFPropertyListRef color = CFPreferencesCopyAppValue(CFSTR("bannercolor"), CFSTR("me.cgm616.volumebar"));
+
+  if(!color)
+    HBLogError(@"Error getting color value from prefs, using fallback");
+
+  UIColor *startColor = LCPParseColorString((NSString*)color, @"#FFFFFF");
+
+  PFColorAlert *alert = [PFColorAlert colorAlertWithStartColor:startColor showAlpha:YES];
+
+  [alert displayWithCompletion:
+    ^void (UIColor *pickedColor){
+      NSString *hexString = [UIColor hexFromColor:pickedColor];
+      hexString = [hexString stringByAppendingFormat:@":%g", pickedColor.alpha];
+
+      CFPreferencesSetAppValue(CFSTR("bannercolor"), hexString, CFSTR("me.cgm616.volumebar"));
+    }
+  ];
+
+  settingsChanged = YES;
 }
 
 -(void)setPreferenceValue:(id)value specifier:(PSSpecifier *)spec {
