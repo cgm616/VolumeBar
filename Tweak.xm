@@ -33,6 +33,10 @@ double height;
 int blurStyle;
 UIColor *color;
 
+/*
+ * Updates NSDictionary preferences when needed.
+ * Called by loadPrefs().
+ */
 static void initPrefs() {
 	CFStringRef appID = CFSTR("me.cgm616.volumebar");
 	CFArrayRef keyList = CFPreferencesCopyKeyList(appID, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
@@ -48,6 +52,11 @@ static void initPrefs() {
 	CFRelease(keyList);
 }
 
+/*
+ * Calls updates actual variables for the banner.
+ * Calls initPrefs() to get preferences dictionary.
+ * Set as callback for preference change notification in ctor.
+ */
 static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   initPrefs();
   NSNumber *key = preferences[@"enabled"];
@@ -94,6 +103,10 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 	[preferences release];
 }
 
+/*
+ * Calls loadPrefs() and sets loadPrefs() as callback for prefs notification.
+ * Called after respring of device.
+ */
 %ctor {
   loadPrefs(nil,nil,nil,nil,nil);
   CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("me.cgm616.volumebar/preferences.changed"), NULL, CFNotificationSuspensionBehaviorCoalesce);
