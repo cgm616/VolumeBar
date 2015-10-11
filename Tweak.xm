@@ -113,29 +113,43 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 }
 
 /*
+ * Allow me to stay DRY with the presentHUDView: and presentHUDView:autoDismissWithDelay:
+ */
+@interface SBHUDController
+
+-(void)presentVolumeBarWithView:(id)view;
+
+@end
+
+/*
  * Main hook for the tweak.
  * Overrides presentHUDView:autoDismissWithDelay: and presentHUDView: to show banner.
  */
 %hook SBHUDController
 
+%new(v@:);
+-(void)presentVolumeBarWithView:(id)view {
+	VolumeBar *vbar = [VolumeBar sharedInstance];
+	vbar.color = color;
+	vbar.animate = animate;
+	vbar.userInteraction = userInteraction;
+	vbar.showRouteButton = showRouteButton;
+	vbar.blur = blur;
+	vbar.drop = drop;
+	vbar.statusBar = statusBar;
+	vbar.slide = slide;
+	vbar.label = label;
+	vbar.brightness = [view isKindOfClass:objc_getClass("SBVolumeHUDView")] ? NO : YES;
+	vbar.delayTime = delayTime;
+	vbar.speed = speed;
+	vbar.height = height;
+	vbar.blurStyle = blurStyle;
+	[vbar loadHUDWithView:view];
+}
+
 -(void)presentHUDView:(id)view autoDismissWithDelay:(double)delay {
   if(([view isKindOfClass:objc_getClass("SBVolumeHUDView")] || [view isKindOfClass:objc_getClass("SBBrightnessHUDView")]) && enabled) {
-    VolumeBar *vbar = [VolumeBar sharedInstance];
-		vbar.color = color;
-		vbar.animate = animate;
-		vbar.userInteraction = userInteraction;
-		vbar.showRouteButton = showRouteButton;
-		vbar.blur = blur;
-		vbar.drop = drop;
-		vbar.statusBar = statusBar;
-		vbar.slide = slide;
-		vbar.label = label;
-		vbar.brightness = [view isKindOfClass:objc_getClass("SBVolumeHUDView")] ? NO : YES;
-		vbar.delayTime = delayTime;
-		vbar.speed = speed;
-		vbar.height = height;
-		vbar.blurStyle = blurStyle;
-		[vbar loadHUDWithView:view];
+    [self presentVolumeBarWithView:view];
   }
   else {
     %orig;
@@ -144,22 +158,7 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
 
 -(void)presentHUDView:(id)view {
 	if(([view isKindOfClass:objc_getClass("SBVolumeHUDView")] || [view isKindOfClass:objc_getClass("SBBrightnessHUDView")]) && enabled) {
-    VolumeBar *vbar = [VolumeBar sharedInstance];
-		vbar.color = color;
-		vbar.animate = animate;
-		vbar.userInteraction = userInteraction;
-		vbar.showRouteButton = showRouteButton;
-		vbar.blur = blur;
-		vbar.drop = drop;
-		vbar.statusBar = statusBar;
-		vbar.slide = slide;
-		vbar.label = label;
-		vbar.brightness = [view isKindOfClass:objc_getClass("SBVolumeHUDView")] ? NO : YES;
-		vbar.delayTime = delayTime;
-		vbar.speed = speed;
-		vbar.height = height;
-		vbar.blurStyle = blurStyle;
-		[vbar loadHUDWithView:view];
+    [self presentVolumeBarWithView:view];
   }
   else {
     %orig;
