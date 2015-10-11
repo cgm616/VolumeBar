@@ -112,6 +112,10 @@ static void loadPrefs(CFNotificationCenterRef center, void *observer, CFStringRe
   CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)loadPrefs, CFSTR("me.cgm616.volumebar/preferences.changed"), NULL, CFNotificationSuspensionBehaviorCoalesce);
 }
 
+/*
+ * Main hook for the tweak.
+ * Overrides presentHUDView:autoDismissWithDelay: and presentHUDView: to show banner.
+ */
 %hook SBHUDController
 
 -(void)presentHUDView:(id)view autoDismissWithDelay:(double)delay {
