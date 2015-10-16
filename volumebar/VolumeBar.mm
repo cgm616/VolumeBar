@@ -196,66 +196,6 @@ static BOOL settingsChanged;
 
 @end
 
-@interface VolumeBarAnimationListController: VBSettingsListController {
-}
-@end
-
-@implementation VolumeBarAnimationListController
-
--(id)specifiers {
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBarAnimation" target:self] retain];
-	}
-	return _specifiers;
-}
-
-@end
-
-@interface VolumeBarCreditListController: VBSettingsListController {
-}
-@end
-
-@implementation VolumeBarCreditListController
-
--(id)specifiers {
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBarCredit" target:self] retain];
-	}
-	return _specifiers;
-}
-
-@end
-
-@interface VolumeBarBannerListController: VBSettingsListController {
-}
-@end
-
-@implementation VolumeBarBannerListController
-
--(id)specifiers {
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBarBanner" target:self] retain];
-	}
-	return _specifiers;
-}
-
-@end
-
-@interface VolumeBarAboutListController: VBSettingsListController {
-}
-@end
-
-@implementation VolumeBarAboutListController
-
--(id)specifiers {
-	if(_specifiers == nil) {
-		_specifiers = [[self loadSpecifiersFromPlistName:@"VolumeBarAbout" target:self] retain];
-	}
-	return _specifiers;
-}
-
-@end
-
 @interface VolumeBarTitleCell : PSTableCell <PreferencesTableCustomView> {
     UILabel *tweakTitle;
     UILabel *tweakSubtitle;

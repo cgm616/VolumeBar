@@ -67,7 +67,7 @@
 	    <key>icon</key>
       <string></string>
 	    <key>detail</key>
-	    <string>VolumeBarBannerListController</string>
+	    <string>VBSettingsListController</string>
     </dict>
 		<dict>
       <key>cell</key>
@@ -79,7 +79,7 @@
 	    <key>icon</key>
       <string></string>
 	    <key>detail</key>
-	    <string>VolumeBarAnimationListController</string>
+	    <string>VBSettingsListController</string>
     </dict>
 		<dict>
       <key>cell</key>
@@ -91,7 +91,7 @@
 	    <key>icon</key>
       <string></string>
 	    <key>detail</key>
-	    <string>VolumeBarCreditListController</string>
+	    <string>VBSettingsListController</string>
     </dict>
 		<dict>
       <key>cell</key>
@@ -103,7 +103,7 @@
 	    <key>icon</key>
       <string></string>
 	    <key>detail</key>
-	    <string>VolumeBarAboutListController</string>
+	    <string>VBSettingsListController</string>
     </dict>
 	</array>
 </dict>
